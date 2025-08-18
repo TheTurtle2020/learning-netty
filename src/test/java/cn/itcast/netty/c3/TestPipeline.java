@@ -24,6 +24,7 @@ public class TestPipeline {
                         // 1. 通过 channel 拿到 pipeline
                         ChannelPipeline pipeline = ch.pipeline();
                         // 2. 添加处理器 head ->  h1 -> h2 ->  h4 -> h3 -> h5 -> h6 -> tail
+                        // 先来几个入站
                         pipeline.addLast("h1", new ChannelInboundHandlerAdapter(){
                             @Override
                             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -43,10 +44,13 @@ public class TestPipeline {
                             @Override
                             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                                 log.debug("3");
+                                // 通常不会在 ChannelInboundHandlerAdapter 里执行 write 等出站方法
+                                // 这里是为了触发下面的出站处理器
                                 ctx.writeAndFlush(ctx.alloc().buffer().writeBytes("server...".getBytes()));
 //                                ch.writeAndFlush(ctx.alloc().buffer().writeBytes("server...".getBytes()));
                             }
                         });
+                        // 下面是出站
                         pipeline.addLast("h4", new ChannelOutboundHandlerAdapter(){
                             @Override
                             public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
