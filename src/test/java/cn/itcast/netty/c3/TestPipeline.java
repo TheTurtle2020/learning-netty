@@ -46,9 +46,9 @@ public class TestPipeline {
                                 log.debug("3");
                                 // 通常不会在 ChannelInboundHandlerAdapter 里执行 write 等出站方法
                                 // 这里是为了触发下面的出站处理器
-                                ctx.writeAndFlush(ctx.alloc().buffer().writeBytes("server...".getBytes()));
+//                                ctx.writeAndFlush(ctx.alloc().buffer().writeBytes("server...".getBytes()));
                                 // 【注意】这里一个是 ctx 另一个是 ch，前者是无效的！
-//                                ch.writeAndFlush(ctx.alloc().buffer().writeBytes("server...".getBytes()));
+                                ch.writeAndFlush(ctx.alloc().buffer().writeBytes("server...".getBytes()));
                             }
                         });
                         // 下面是出站
