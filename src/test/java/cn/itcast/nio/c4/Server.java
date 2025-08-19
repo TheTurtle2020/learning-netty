@@ -20,10 +20,10 @@ public class Server {
         // 2. 建立 selector 和 channel 的联系（注册）
         // SelectionKey 就是将来事件发生后，通过它可以知道事件和哪个channel的事件
         SelectionKey sscKey = ssc.register(selector, 0, null);
-        // key 只关注 accept 事件
+        // ServerSocketChannel 的 key 只关注 accept 事件
         sscKey.interestOps(SelectionKey.OP_ACCEPT);
         log.debug("sscKey:{}", sscKey);
-        ssc.bind(new InetSocketAddress(8080));
+        ssc.bind(new InetSocketAddress(2002));
         while (true) {
             // 3. select 方法, 没有事件发生，线程阻塞，有事件，线程才会恢复运行
             // select 在事件未处理时，它不会阻塞, 事件发生后要么处理，要么取消，不能置之不理
@@ -37,17 +37,18 @@ public class Server {
                 log.debug("key: {}", key);
                 // 5. 区分事件类型
                 if (key.isAcceptable()) { // 如果是 accept
-                    ServerSocketChannel channel = (ServerSocketChannel) key.channel();
+                    ServerSocketChannel channel = (ServerSocketChannel) key.channel(); // 拿到触发事件的channel，他肯定是ServerSocketChannel
                     SocketChannel sc = channel.accept();
                     sc.configureBlocking(false);
 
                     SelectionKey scKey = sc.register(selector, 0, null);
+                    // SocketChannel 的 key 关心 read/write 事件
                     scKey.interestOps(SelectionKey.OP_READ);
                     log.debug("{}", sc);
                     log.debug("scKey:{}", scKey);
                 } else if (key.isReadable()) { // 如果是 read
                     try {
-                        SocketChannel channel = (SocketChannel) key.channel(); // 拿到触发事件的channel
+                        SocketChannel channel = (SocketChannel) key.channel(); // 拿到触发事件的channel，他肯定是SocketChannel
                         ByteBuffer buffer = ByteBuffer.allocate(4);
                         int read = channel.read(buffer); // 如果是正常断开，read 的方法的返回值是 -1
                         if(read == -1) {
