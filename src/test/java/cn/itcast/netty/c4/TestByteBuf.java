@@ -7,7 +7,7 @@ import static io.netty.buffer.ByteBufUtil.appendPrettyHexDump;
 import static io.netty.util.internal.StringUtil.NEWLINE;
 
 public class TestByteBuf {
-    public static void main(String[] args) {
+        public static void main(String[] args) {
 
         ByteBuf buf = ByteBufAllocator.DEFAULT.buffer();
         System.out.println(buf.getClass());
@@ -20,6 +20,21 @@ public class TestByteBuf {
         buf.writeBytes(sb.toString().getBytes());
         log(buf);
     }
+//    public static void main(String[] args) {
+//        ByteBuf buf = ByteBufAllocator.DEFAULT.buffer(10);
+//        buf.writeBytes(new byte[]{1, 2, 3, 4});
+//        log(buf);
+//        buf.markReaderIndex(); // mark
+//        byte aByte = buf.readByte();
+//        System.out.println("读取一个字节: " + aByte);
+//        log(buf);
+//
+//        buf.resetReaderIndex(); // find mark
+//        System.out.println("重置");
+//        log(buf);
+//        System.out.println("重新读取一个字节: " + buf.readByte());
+//        log(buf);
+//    }
 
     public static void log(ByteBuf buffer) {
         int length = buffer.readableBytes();
