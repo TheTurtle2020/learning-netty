@@ -16,6 +16,7 @@ public class TestSlice {
         f1.retain();
         // 'a','b','c','d','e', 'x'
         ByteBuf f2 = buf.slice(5, 5);
+        // buf.writeByte('x'); // 报错，f1无法写入，因为会跟f2冲突
         f2.retain();
         log(f1);
         log(f2);
