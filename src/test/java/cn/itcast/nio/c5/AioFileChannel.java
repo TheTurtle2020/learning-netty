@@ -34,9 +34,9 @@ public class AioFileChannel {
                 }
             });
             log.debug("read end...");
+            System.in.read();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.in.read();
     }
 }
