@@ -13,7 +13,7 @@ public class WriteServer {
         ssc.configureBlocking(false);
         Selector selector = Selector.open();
         ssc.register(selector, SelectionKey.OP_ACCEPT);
-        ssc.bind(new InetSocketAddress(8080));
+        ssc.bind(new InetSocketAddress(2002));
         while (true) {
             selector.select();
             Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
@@ -32,13 +32,13 @@ public class WriteServer {
                     }
                     ByteBuffer buffer = Charset.defaultCharset().encode(sb.toString());
 
-                    // 2. 返回值代表实际写入的字节数
+                    // 2. 返回值代表实际写入的字节数，因为数据量太大时不能保证一次写完
                     int write = sc.write(buffer);
                     System.out.println(write);
 
                     // 3. 判断是否有剩余内容
                     if (buffer.hasRemaining()) {
-                        // 4. 关注可写事件   1                     4
+                        // 4. 新增关注：可写事件   1                     4
                         sckey.interestOps(sckey.interestOps() + SelectionKey.OP_WRITE);
 //                        sckey.interestOps(sckey.interestOps() | SelectionKey.OP_WRITE);
                         // 5. 把未写完的数据挂到 sckey 上

@@ -8,7 +8,7 @@ import java.nio.channels.SocketChannel;
 public class WriteClient {
     public static void main(String[] args) throws IOException {
         SocketChannel sc = SocketChannel.open();
-        sc.connect(new InetSocketAddress("localhost", 8080));
+        sc.connect(new InetSocketAddress("localhost", 2002));
 
         // 3. 接收数据
         int count = 0;
