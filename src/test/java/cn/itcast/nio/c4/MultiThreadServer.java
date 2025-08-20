@@ -41,7 +41,7 @@ public class MultiThreadServer {
                     // 2. 关联 selector
                     log.debug("before register...{}", sc.getRemoteAddress());
                     // round robin 轮询
-                    workers[index.getAndIncrement() % workers.length].register(sc); // boss 调用 初始化 selector , 启动 worker-0
+                    workers[index.getAndIncrement() % workers.length].init(sc); // boss 调用 初始化 selector , 启动 worker-0
                     log.debug("after register...{}", sc.getRemoteAddress());
                 }
             }
@@ -51,6 +51,8 @@ public class MultiThreadServer {
         private Thread thread;
         private Selector selector;
         private String name;
+
+        // 其实这里不用 volatile 即可，boss 线程只有一个，无并发安全问题
         private volatile boolean start = false; // 还未初始化
         private ConcurrentLinkedQueue<Runnable> queue = new ConcurrentLinkedQueue<>();
         public Worker(String name) {
@@ -58,13 +60,15 @@ public class MultiThreadServer {
         }
 
         // 初始化线程，和 selector
-        public void register(SocketChannel sc) throws IOException {
+        public void init(SocketChannel sc) throws IOException {
             if(!start) {
                 selector = Selector.open();
                 thread = new Thread(this, name);
                 thread.start();
                 start = true;
             }
+            // TODO 这种方式仍然有问题，比如 wakeup -> select -> select -> register 会阻塞
+            // TODO Netty 解决方案参考：异步队列 + wakeup
             selector.wakeup(); // 唤醒 select 方法 boss
             sc.register(selector, SelectionKey.OP_READ, null); // boss
         }
@@ -79,6 +83,7 @@ public class MultiThreadServer {
                         SelectionKey key = iter.next();
                         iter.remove();
                         if (key.isReadable()) {
+                            // 还有很多细节：比如沾包、半包问题，再比如 channel.read(buffer) 出异常了要 cancel key
                             ByteBuffer buffer = ByteBuffer.allocate(16);
                             SocketChannel channel = (SocketChannel) key.channel();
                             log.debug("read...{}", channel.getRemoteAddress());
